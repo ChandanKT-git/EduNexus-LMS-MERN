@@ -65,7 +65,8 @@ const Login = () => {
 
   useEffect(() => {
     if(registerIsSuccess && registerData){
-      toast.success(registerData.message || "Signup successful.")
+      toast.success(registerData.message || "Signup successful. Please login to continue.")
+      setActiveTab("login");
     }
     if(registerError){
       toast.error(registerError.data.message || "Signup Failed");
@@ -87,9 +88,9 @@ const Login = () => {
   ]);
 
   return (
-    <div className="flex items-center w-full justify-center mt-20">
-      <Tabs defaultValue="login" className="w-[400px]">
-        <TabsList className="grid w-full grid-cols-2">
+    <div className="flex justify-center items-center w-full h-screen">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="signup">Signup</TabsTrigger>
           <TabsTrigger value="login">Login</TabsTrigger>
         </TabsList>
@@ -143,7 +144,7 @@ const Login = () => {
               >
                 {registerIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
+                    <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Please
                     wait
                   </>
                 ) : (
@@ -192,7 +193,7 @@ const Login = () => {
               >
                 {loginIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
+                    <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Please
                     wait
                   </>
                 ) : (
