@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
 import { Lecture } from "../models/lecture.model.js";
+import { CoursePurchase } from "../models/coursePurchase.model.js";
+import { CourseProgress } from "../models/courseProgress.js";
 import connectDB from "../database/db.js";
 
 dotenv.config();
@@ -16,6 +18,8 @@ const seedDatabase = async () => {
         await User.deleteMany({});
         await Course.deleteMany({});
         await Lecture.deleteMany({});
+        await CoursePurchase.deleteMany({});
+        await CourseProgress.deleteMany({});
 
         console.log("Creating users...");
         const hashedPassword = await bcrypt.hash("password123", 10);
@@ -102,33 +106,117 @@ const seedDatabase = async () => {
             enrolledStudents: [student2._id]
         });
 
+        // Update students' enrolledCourses
+        await User.findByIdAndUpdate(student1._id, { $push: { enrolledCourses: [course1._id, course2._id] } });
+        await User.findByIdAndUpdate(student2._id, { $push: { enrolledCourses: [course1._id, course4._id] } });
+
+        console.log("Creating purchases...");
+        // Create purchases for enrolled students
+        await CoursePurchase.create([
+            {
+                courseId: course1._id,
+                userId: student1._id,
+                amount: course1.coursePrice,
+                status: 'completed',
+                paymentId: `pay_${Math.random().toString(36).substr(2, 9)}`
+            },
+            {
+                courseId: course2._id,
+                userId: student1._id,
+                amount: course2.coursePrice,
+                status: 'completed',
+                paymentId: `pay_${Math.random().toString(36).substr(2, 9)}`
+            },
+            {
+                courseId: course1._id,
+                userId: student2._id,
+                amount: course1.coursePrice,
+                status: 'completed',
+                paymentId: `pay_${Math.random().toString(36).substr(2, 9)}`
+            },
+            {
+                courseId: course4._id,
+                userId: student2._id,
+                amount: course4.coursePrice,
+                status: 'completed',
+                paymentId: `pay_${Math.random().toString(36).substr(2, 9)}`
+            }
+        ]);
+
         console.log("Creating lectures...");
 
-        // Lectures for Course 1
-        const c1l1 = await Lecture.create({
-            lectureTitle: "Introduction to MERN",
-            videoUrl: "https://res.cloudinary.com/demo/video/upload/v1666624022/samples/sea-turtle.mp4",
-            publicId: "samples/sea-turtle",
-            isPreviewFree: true,
-        });
-        const c1l2 = await Lecture.create({
-            lectureTitle: "Setting up Node.js",
-            videoUrl: "https://res.cloudinary.com/demo/video/upload/v1666624022/samples/sea-turtle.mp4",
-            publicId: "samples/sea-turtle",
-            isPreviewFree: false,
-        });
-        course1.lectures.push(c1l1._id, c1l2._id);
-        await course1.save();
+        // Helper to create lectures
+        const createLectures = async (course, titles) => {
+            const lectureIds = [];
+            for (const title of titles) {
+                const lecture = await Lecture.create({
+                    lectureTitle: title,
+                    videoUrl: "https://res.cloudinary.com/demo/video/upload/v1666624022/samples/sea-turtle.mp4", // Placeholder video
+                    publicId: "samples/sea-turtle",
+                    isPreviewFree: Math.random() < 0.3 // 30% chance of being free preview
+                });
+                lectureIds.push(lecture._id);
+            }
+            course.lectures.push(...lectureIds);
+            await course.save();
+            return lectureIds;
+        };
 
-        // Lectures for Course 2
-        const c2l1 = await Lecture.create({
-            lectureTitle: "Python Basics",
-            videoUrl: "https://res.cloudinary.com/demo/video/upload/v1666624022/samples/sea-turtle.mp4",
-            publicId: "samples/sea-turtle",
-            isPreviewFree: true,
+        const c1Lectures = await createLectures(course1, [
+            "Introduction to MERN Stack",
+            "Setting up the Environment",
+            "MongoDB Atlas Setup",
+            "Express Server Basics",
+            "React Frontend Initialization",
+            "Connecting Frontend to Backend"
+        ]);
+
+        const c2Lectures = await createLectures(course2, [
+            "Python Installation & Basics",
+            "Variables and Data Types",
+            "Control Flow: If/Else & Loops",
+            "Functions and Modules",
+            "Introduction to Pandas",
+            "Data Visualization with Matplotlib"
+        ]);
+
+        const c3Lectures = await createLectures(course3, [
+            "Digital Marketing Fundamentals",
+            "SEO Basics",
+            "Social Media Strategy",
+            "Email Marketing Campaigns",
+            "Google Analytics Overview"
+        ]);
+
+        const c4Lectures = await createLectures(course4, [
+            "Advanced Hooks: useMemo & useCallback",
+            "Context API vs Redux",
+            "React Performance Optimization",
+            "Custom Hooks Patterns",
+            "Server Side Rendering (SSR)"
+        ]);
+
+        console.log("Creating course progress...");
+
+        // Student 1 has watched some lectures of Course 1
+        await CourseProgress.create({
+            userId: student1._id,
+            courseId: course1._id,
+            completed: false,
+            lectureProgress: [
+                { lectureId: c1Lectures[0], viewed: true },
+                { lectureId: c1Lectures[1], viewed: true },
+                { lectureId: c1Lectures[2], viewed: false }
+            ]
         });
-        course2.lectures.push(c2l1._id);
-        await course2.save();
+
+        // Student 2 has completed Course 4
+        await CourseProgress.create({
+            userId: student2._id,
+            courseId: course4._id,
+            completed: true,
+            lectureProgress: c4Lectures.map(lecId => ({ lectureId: lecId, viewed: true }))
+        });
 
         console.log("Database seeded successfully!");
         console.log("-----------------------------------------");
