@@ -98,8 +98,8 @@ const Login = () => {
         <TabsContent value="signup">
           <Card>
             <CardHeader>
-              <CardTitle>Signup</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-center">Signup</CardTitle>
+              <CardDescription className="text-center">
                 Create a new account and click signup when you're done.
               </CardDescription>
             </CardHeader>
@@ -142,6 +142,7 @@ const Login = () => {
               <Button
                 disabled={registerIsLoading}
                 onClick={() => handleRegistration("signup")}
+                className="w-full"
               >
                 {registerIsLoading ? (
                   <>
@@ -158,8 +159,8 @@ const Login = () => {
         <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>Login</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-center">Login</CardTitle>
+              <CardDescription className="text-center">
                 Login your password here. After signup, you'll be logged in.
               </CardDescription>
             </CardHeader>
@@ -191,6 +192,7 @@ const Login = () => {
               <Button
                 disabled={loginIsLoading}
                 onClick={() => handleRegistration("login")}
+                className="w-full"
               >
                 {loginIsLoading ? (
                   <>
