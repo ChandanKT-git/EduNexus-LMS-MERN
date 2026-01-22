@@ -55,6 +55,8 @@ const CourseProgress = () => {
   const initialLecture =
     currentLecture || (courseDetails.lectures && courseDetails.lectures[0]);
 
+  if (!initialLecture) return <p>No lectures available for this course</p>;
+
   const isLectureCompleted = (lectureId) => {
     return progress.some((prog) => prog.lectureId === lectureId && prog.viewed);
   };

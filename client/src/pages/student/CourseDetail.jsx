@@ -83,12 +83,18 @@ const CourseDetail = () => {
           <Card>
             <CardContent className="p-4 flex flex-col">
               <div className="w-full aspect-video mb-4">
-                <ReactPlayer
-                  width="100%"
-                  height={"100%"}
-                  url={course.lectures[0].videoUrl}
-                  controls={true}
-                />
+                {course.lectures && course.lectures.length > 0 && course.lectures[0] ? (
+                  <ReactPlayer
+                    width="100%"
+                    height={"100%"}
+                    url={course.lectures[0].videoUrl}
+                    controls={true}
+                  />
+                ) : (
+                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <p>No video available</p>
+                   </div>
+                )}
               </div>
               <h1>Lecture title</h1>
               <Separator className="my-2" />
