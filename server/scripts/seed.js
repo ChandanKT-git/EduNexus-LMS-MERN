@@ -88,5 +88,3 @@ const seedDatabase = async () => {
         process.exit(1);
     }
 };
-
-seedDatabase();
