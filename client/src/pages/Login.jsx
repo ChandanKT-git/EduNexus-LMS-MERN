@@ -27,6 +27,7 @@ const Login = () => {
     password: "",
   });
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+  const [activeTab, setActiveTab] = useState("login");
 
   const [
     registerUser,
